@@ -1,4 +1,4 @@
-package Updater.Exception;
+package git.sync.exception;
 
 /**
  * Created by Unknown on 5/01/2016.

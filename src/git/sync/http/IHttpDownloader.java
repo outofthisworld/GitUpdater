@@ -1,4 +1,4 @@
-package Updater.Http;
+package git.sync.http;
 
 import java.net.URL;
 import java.nio.charset.Charset;

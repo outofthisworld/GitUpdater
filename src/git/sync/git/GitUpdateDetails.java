@@ -1,4 +1,4 @@
-package Updater.Git;
+package git.sync.git;
 
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;

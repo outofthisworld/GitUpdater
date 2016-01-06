@@ -1,6 +1,4 @@
-package Updater.Http;
-
-import Updater.Exception.ProjectRevisionException;
+package git.sync.http;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -9,7 +7,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Created by Unknown on 6/01/2016.
@@ -35,8 +32,12 @@ public class HttpDownloader implements IHttpDownloader {
 
     public ByteBuffer readChannel(ReadableByteChannel channel,int size) throws IOException {
         ByteBuffer byteBuffer = ByteBuffer.allocate(size);
-        channel.read(byteBuffer);
+        int bytesRead = 0;
+        while(bytesRead < size){
+            bytesRead += channel.read(byteBuffer);
+        }
         channel.close();
+        byteBuffer.flip();
         return byteBuffer;
     }
 

@@ -1,8 +1,8 @@
-import Json.Git.GitParseListener;
-import Updater.Exception.ProjectRevisionException;
-import Updater.Git.GitUpdateDetails;
-import Updater.Git.GitUpdater;
-import Updater.Http.HttpDownloader;
+import git.sync.listener.GitParseListener;
+import git.sync.exception.ProjectRevisionException;
+import git.sync.git.GitUpdateDetails;
+import git.sync.git.GitUpdater;
+import git.sync.http.HttpDownloader;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -32,6 +32,7 @@ public class TestUpdater {
                     System.out.println("Downloaded file to: " + path.toAbsolutePath());
                 }
             };
+            System.out.println(gitUpdater.projectNeedsUpdating());
             gitUpdater.tryUpdate();
             gitUpdater.tryUpdate();
         } catch (IOException e) {

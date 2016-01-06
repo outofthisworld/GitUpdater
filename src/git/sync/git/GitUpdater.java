@@ -1,9 +1,9 @@
-package Updater.Git;
+package git.sync.git;
 
-import Json.Git.IGitParseListener;
-import Updater.Exception.ProjectRevisionException;
-import Updater.Http.IHttpDownloader;
-import Updater.Updaters.HttpUpdater;
+import git.sync.listener.IGitParseListener;
+import git.sync.exception.ProjectRevisionException;
+import git.sync.http.IHttpDownloader;
+import git.sync.updaters.HttpUpdater;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -17,8 +17,16 @@ public abstract class GitUpdater extends HttpUpdater {
     private final String GIT_API_URL;
     private IGitParseListener parseListener;
     private GitUpdateDetails updateDetails;
+    private String downloadPath = System.getProperty("user.home");
 
     public <T extends GitUpdateDetails,U extends IGitParseListener,V extends IHttpDownloader> GitUpdater(T gitUpdateDetails,U parseListener,V httpDownloader){
+        super(httpDownloader);
+        this.updateDetails = gitUpdateDetails;
+        this.parseListener = parseListener;
+        GIT_API_URL = String.format("https://api.github.com/repos/%s/%s/commits?", updateDetails.getGitUser(), updateDetails.getRepo());
+    }
+
+    public <T extends GitUpdateDetails,U extends IGitParseListener,V extends IHttpDownloader> GitUpdater(final String projectDownloadPath,T gitUpdateDetails,U parseListener,V httpDownloader){
         super(httpDownloader);
         this.updateDetails = gitUpdateDetails;
         this.parseListener = parseListener;
@@ -42,6 +50,10 @@ public abstract class GitUpdater extends HttpUpdater {
             e.printStackTrace();
         }
         return parseListener.getLatestRevision();
+    }
+
+    public void setDownloadPath(String downloadPath){
+        this.downloadPath = downloadPath;
     }
 
     @Override

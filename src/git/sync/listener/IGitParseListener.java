@@ -1,6 +1,4 @@
-package Json.Git;
-
-import Updater.Git.ParseListener;
+package git.sync.listener;
 
 /**
  * Created by Unknown on 6/01/2016.

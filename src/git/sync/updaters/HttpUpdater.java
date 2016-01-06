@@ -1,6 +1,6 @@
-package Updater.Updaters;
+package git.sync.updaters;
 
-import Updater.Http.IHttpDownloader;
+import git.sync.http.IHttpDownloader;
 
 /**
  * Created by Unknown on 6/01/2016.

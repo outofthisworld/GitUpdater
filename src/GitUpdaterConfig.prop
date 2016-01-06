@@ -1,0 +1,4 @@
+Git.Repository = "HttpServer"
+Git.User = "outofthisworld"
+Git.BranchOrSha = "master"
+Git.CurrentProjectRevision = ""

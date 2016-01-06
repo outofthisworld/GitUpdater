@@ -1,6 +1,6 @@
-package Updater.Updaters;
+package git.sync.updaters;
 
-import Updater.Exception.ProjectRevisionException;
+import git.sync.exception.ProjectRevisionException;
 
 import javax.xml.ws.http.HTTPException;
 import java.io.FileNotFoundException;
@@ -20,6 +20,8 @@ public abstract class Updater{
 
 
     public boolean pathExists(Path filePath){return filePath != null && Files.exists(filePath);}
+
+    public boolean projectNeedsUpdating() throws ProjectRevisionException {return !getCurrentProjectRevision().equals(getLatestProjectRevision());}
 
     public boolean tryUpdate() throws FileNotFoundException, ProjectRevisionException {
         final String currentProjectRevision = getCurrentProjectRevision();
