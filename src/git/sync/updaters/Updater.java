@@ -33,7 +33,7 @@ public abstract class Updater{
     public boolean pathExists(Path filePath){return filePath != null && Files.exists(filePath);}
     public boolean projectNeedsUpdating() throws ProjectRevisionException {return !getCurrentProjectRevision().equals(getLatestProjectRevision());}
 
-    private boolean projectNeedsUpdating(String currentRevision, String latestRevision) {
+    private boolean isUpToDate(String currentRevision, String latestRevision) {
         return !currentRevision.equals(latestRevision);
     }
 
@@ -44,7 +44,7 @@ public abstract class Updater{
         if(currentProjectRevision == null || latestProjectRevision == null)
             throw new ProjectRevisionException("Either current project revision or latest project revision return null");
 
-        if (projectNeedsUpdating(currentProjectRevision, latestProjectRevision))
+        if (!isUpToDate(currentProjectRevision, latestProjectRevision))
             return false;
 
         Path filePath = Paths.get(downloadLatestRevision());
