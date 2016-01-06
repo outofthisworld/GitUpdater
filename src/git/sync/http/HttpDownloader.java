@@ -5,8 +5,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 /**
  * Created by Unknown on 6/01/2016.
@@ -42,18 +46,44 @@ public class HttpDownloader implements IHttpDownloader {
     }
 
     @Override
-    public String downloadHttpContent(URL url,Charset defaultCharset) {
-        String content = null;
+    public byte[] downloadHttpContent(URL url) {
+        byte[] contentBytes = null;
         try {
-            HttpURLConnection gitConnectURL = establishHttpUrlConnection(
-                    url);
-            content= new String(
-                    readChannel(createReadableByteChannel(gitConnectURL), gitConnectURL.getContentLength()).array(),
-                    getHttpContentEncoding(gitConnectURL, defaultCharset
-            ));
+            HttpURLConnection gitConnectURL = establishHttpUrlConnection(url);
+            contentBytes = readChannel(createReadableByteChannel(gitConnectURL), gitConnectURL.getContentLength()).array();
         } catch (IOException e) {
-            return content;
+            return contentBytes;
         }
-        return content;
+        return contentBytes;
+    }
+
+    public long getContentLength(URL url) throws IOException {
+        return establishHttpUrlConnection(url).getContentLengthLong();
+    }
+
+    public long getContentLength(HttpURLConnection con) throws IOException {
+        con.connect();
+        return con.getContentLengthLong();
+    }
+
+    @Override
+    public void downloadHttpContent(URL url, Path path) {
+        try {
+            HttpURLConnection con = establishHttpUrlConnection(url);
+            ReadableByteChannel readableByteChannel = createReadableByteChannel(con);
+
+            if (Files.exists(path))
+                Files.delete(path);
+
+            FileChannel fileChannel = FileChannel.open(path, StandardOpenOption.CREATE_NEW, StandardOpenOption.READ, StandardOpenOption.WRITE);
+            long bytesTransfered = 0;
+            while (bytesTransfered < con.getContentLengthLong()) {
+                bytesTransfered = fileChannel.transferFrom(readableByteChannel, bytesTransfered, con.getContentLengthLong());
+                fileChannel.force(false);
+            }
+            fileChannel.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
