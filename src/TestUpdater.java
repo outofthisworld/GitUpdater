@@ -1,7 +1,8 @@
-import Json.Git.GitParseListenerImpl;
+import Json.Git.GitParseListener;
 import Updater.Exception.ProjectRevisionException;
 import Updater.Git.GitUpdateDetails;
 import Updater.Git.GitUpdater;
+import Updater.Http.HttpDownloader;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -13,7 +14,7 @@ public class TestUpdater {
     public static void main(String[] args) {
         try {
             GitUpdater gitUpdater = new GitUpdater(
-                    new GitUpdateDetails("HttpServer","outofthisworld","master"), new GitParseListenerImpl()) {
+                    new GitUpdateDetails("HttpServer","outofthisworld","master"), new GitParseListener(),new HttpDownloader()) {
                 @Override
                 public String getCurrentProjectRevision() throws ProjectRevisionException {
                     return "122";

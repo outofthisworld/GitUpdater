@@ -1,4 +1,4 @@
-package Updater;
+package Updater.Updaters;
 
 import Updater.Exception.ProjectRevisionException;
 
@@ -11,10 +11,7 @@ import java.nio.file.Paths;
 /**
  * Created by Unknown on 5/01/2016.
  */
-public abstract class Updater {
-
-    public Updater(){}
-
+public abstract class Updater{
     public abstract String getCurrentProjectRevision() throws ProjectRevisionException;
     public abstract String getLatestProjectRevision() throws ProjectRevisionException;
     public abstract String downloadLatestRevision() throws HTTPException;
