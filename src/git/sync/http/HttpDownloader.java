@@ -26,7 +26,6 @@ public class HttpDownloader implements IHttpDownloader {
 
     public HttpURLConnection establishHttpUrlConnection(URL url) throws IOException {
         HttpURLConnection gitConnectURL = ((HttpURLConnection) url.openConnection());
-        gitConnectURL.connect();
         return gitConnectURL;
     }
 

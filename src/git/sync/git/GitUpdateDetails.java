@@ -11,10 +11,10 @@ import java.util.Map;
  * Created by Unknown on 5/01/2016.
  */
 public class GitUpdateDetails {
+    private static final String ISO_8601_DATE_FMT = "yyyy-MM-dd'T'HH:mmX";
     private final String repo;
     private final String gitUser;
     private final HashMap<String,String> params = new HashMap<>();
-    private static final String ISO_8601_DATE_FMT = "yyyy-MM-dd'T'HH:mmX";
 
     public GitUpdateDetails(String repo,String gitUser){
         this.repo = repo;
@@ -51,6 +51,10 @@ public class GitUpdateDetails {
 
     public void addParam(Object key,Object value){
         params.put(key.toString(),value.toString());
+    }
+
+    public HashMap<String, String> getParams() {
+        return params;
     }
 
     public final String getRepo(){
