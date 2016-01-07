@@ -18,8 +18,6 @@ public class TestUpdater {
             }
         };
         try {
-            if (ConfigGitUpdater.gitConfig.contains("Git.LastRevisionChange"))
-                gitUpdater.getGitUpdateDetails().addParam("since", ConfigGitUpdater.gitConfig.get("Git.LastRevisionChange"));
             if (!gitUpdater.isUpToDate()) {
                 gitUpdater.tryUpdate();
             } else {

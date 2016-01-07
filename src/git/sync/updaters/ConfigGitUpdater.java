@@ -15,7 +15,6 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
-import java.util.zip.ZipFile;
 
 /**
  * Created by Unknown on 6/01/2016.
@@ -64,18 +63,7 @@ public abstract class ConfigGitUpdater extends GitUpdater {
     }
 
     @Override
-    public boolean verifyDownload(URL sourceDownloadURL, Path downloadedFilePath) throws ProjectRevisionException {
-        boolean verification = false;
-        try {
-            ZipFile zipFile = new ZipFile(downloadedFilePath.toFile());
-            verification =
-                    ((HttpDownloader) getHttpDownloader())
-                            .getContentLength(sourceDownloadURL)
-                            == downloadedFilePath.toFile().length() &&
-                            zipFile.getComment().equals(getLatestProjectRevision());
-        } catch (IOException e) {
-            return verification;
-        }
-        return verification;
+    public boolean verifyDownload(URL sourceDownloadURL, Path downloadedFilePath, String latestProjectRevision) throws ProjectRevisionException {
+        return true;
     }
 }

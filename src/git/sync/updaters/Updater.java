@@ -33,7 +33,7 @@ public abstract class Updater{
         if(!pathExists(filePath))
             throw new FileNotFoundException("Could not find the latest download revision file");
 
-        if (!verifyDownload(getDownloadURL(), filePath))
+        if (!verifyDownload(getDownloadURL(), filePath, latestProjectRevision))
             throw new FileVerificationException("Could not verify the downloaded file");
 
         changeProjectRevision(currentProjectRevision,latestProjectRevision);
@@ -65,7 +65,7 @@ public abstract class Updater{
 
     protected abstract boolean changeProjectRevision(String oldRevision, String newRevision) throws ProjectRevisionException, IOException, URISyntaxException;
 
-    protected abstract boolean verifyDownload(URL sourceDownloadURL, Path downloadedFilePath) throws ProjectRevisionException;
+    protected abstract boolean verifyDownload(URL sourceDownloadURL, Path downloadedFilePath, String latestProjectRevision) throws ProjectRevisionException;
 
     protected abstract void handleDownload(Path path);
 }

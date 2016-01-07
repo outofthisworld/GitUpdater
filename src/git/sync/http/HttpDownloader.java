@@ -44,6 +44,19 @@ public class HttpDownloader implements IHttpDownloader {
         return byteBuffer;
     }
 
+    public void readChannel(ReadableByteChannel readableByteChannel, Path path, long size) throws IOException {
+        if (Files.exists(path))
+            Files.delete(path);
+
+        FileChannel fileChannel = FileChannel.open(path, StandardOpenOption.CREATE_NEW, StandardOpenOption.READ, StandardOpenOption.WRITE);
+        long bytesTransfered = 0;
+        while (bytesTransfered < size) {
+            bytesTransfered = fileChannel.transferFrom(readableByteChannel, bytesTransfered, size);
+            fileChannel.force(false);
+        }
+        fileChannel.close();
+    }
+
     @Override
     public byte[] downloadHttpContent(URL url) {
         byte[] contentBytes = null;
@@ -70,17 +83,7 @@ public class HttpDownloader implements IHttpDownloader {
         try {
             HttpURLConnection con = establishHttpUrlConnection(url);
             ReadableByteChannel readableByteChannel = createReadableByteChannel(con);
-
-            if (Files.exists(path))
-                Files.delete(path);
-
-            FileChannel fileChannel = FileChannel.open(path, StandardOpenOption.CREATE_NEW, StandardOpenOption.READ, StandardOpenOption.WRITE);
-            long bytesTransfered = 0;
-            while (bytesTransfered < con.getContentLengthLong()) {
-                bytesTransfered = fileChannel.transferFrom(readableByteChannel, bytesTransfered, con.getContentLengthLong());
-                fileChannel.force(false);
-            }
-            fileChannel.close();
+            readChannel(readableByteChannel, path, con.getContentLengthLong());
         } catch (IOException e) {
             e.printStackTrace();
         }
