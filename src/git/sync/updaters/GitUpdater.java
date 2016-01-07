@@ -1,6 +1,5 @@
 package git.sync.updaters;
 
-import git.sync.exception.ProjectRevisionException;
 import git.sync.git.GitUpdateDetails;
 import git.sync.http.HttpDownloader;
 import git.sync.listener.IGitParseListener;
@@ -17,18 +16,18 @@ import java.util.Map;
 public abstract class GitUpdater extends HttpUpdater<HttpDownloader> {
     private static final String GIT_API_URL = "https://api.github.com/repos/%s/%s/commits?";
     private static final String MASTER_DOWNLOAD_URL = "https://github.com/%s/%s/archive/";
-    private String formattedGitApiUrl;
-    private String formattedMasterDownloadUrl;
+    private URL formattedGitApiUrl;
+    private URL formattedMasterDownloadUrl;
     private IGitParseListener parseListener;
     private GitUpdateDetails updateDetails;
     private Path downloadPath;
 
-    public <T extends GitUpdateDetails, U extends IGitParseListener, V extends HttpDownloader> GitUpdater(T gitUpdateDetails, U parseListener, V httpDownloader) {
+    public <T extends GitUpdateDetails, U extends IGitParseListener, V extends HttpDownloader> GitUpdater(T gitUpdateDetails, U parseListener, V httpDownloader) throws MalformedURLException {
         super(httpDownloader);
         this.updateDetails = gitUpdateDetails;
         this.parseListener = parseListener;
-        formattedGitApiUrl = String.format(GIT_API_URL, updateDetails.getGitUser(), updateDetails.getRepo());
-        formattedMasterDownloadUrl = String.format(MASTER_DOWNLOAD_URL, updateDetails.getGitUser(), updateDetails.getRepo());
+        formattedGitApiUrl = new URL(String.format(GIT_API_URL, updateDetails.getGitUser(), updateDetails.getRepo()));
+        formattedMasterDownloadUrl = new URL(String.format(MASTER_DOWNLOAD_URL, updateDetails.getGitUser(), updateDetails.getRepo()));
         downloadPath = getDownloadPath();
     }
 
@@ -38,7 +37,7 @@ public abstract class GitUpdater extends HttpUpdater<HttpDownloader> {
         refreshMasterDownloadURL();
     }
 
-    public void setRepo(String repo) {
+    public void setRepo(String repo) throws MalformedURLException {
         GitUpdateDetails gitUpdateDetails = new GitUpdateDetails(repo, updateDetails.getGitUser());
         transferParams(gitUpdateDetails);
         this.updateDetails = gitUpdateDetails;
@@ -46,7 +45,7 @@ public abstract class GitUpdater extends HttpUpdater<HttpDownloader> {
         refreshMasterDownloadURL();
     }
 
-    public void setGitUser(String gitUser) {
+    public void setGitUser(String gitUser) throws MalformedURLException {
         GitUpdateDetails gitUpdateDetails = new GitUpdateDetails(updateDetails.getRepo(), gitUser);
         transferParams(gitUpdateDetails);
         this.updateDetails = gitUpdateDetails;
@@ -54,7 +53,7 @@ public abstract class GitUpdater extends HttpUpdater<HttpDownloader> {
         refreshMasterDownloadURL();
     }
 
-    public void setGitUserRepo(String gitUser, String repo) {
+    public void setGitUserRepo(String gitUser, String repo) throws MalformedURLException {
         GitUpdateDetails gitUpdateDetails = new GitUpdateDetails(gitUser, repo);
         transferParams(gitUpdateDetails);
         this.updateDetails = gitUpdateDetails;
@@ -66,7 +65,7 @@ public abstract class GitUpdater extends HttpUpdater<HttpDownloader> {
         return updateDetails;
     }
 
-    public <T extends GitUpdateDetails> void setGitUpdateDetails(T gitUpdateDetails) {
+    public <T extends GitUpdateDetails> void setGitUpdateDetails(T gitUpdateDetails) throws MalformedURLException {
         this.updateDetails = gitUpdateDetails;
         refreshGitApiURL();
         refreshMasterDownloadURL();
@@ -78,16 +77,16 @@ public abstract class GitUpdater extends HttpUpdater<HttpDownloader> {
         }
     }
 
-    private final void refreshGitApiURL() {
-        formattedGitApiUrl = String.format(GIT_API_URL, updateDetails.getGitUser(), updateDetails.getRepo());
+    private final void refreshGitApiURL() throws MalformedURLException {
+        formattedGitApiUrl = new URL(String.format(GIT_API_URL, updateDetails.getGitUser(), updateDetails.getRepo()));
     }
 
     public void setDownloadPath(Path downloadPath) {
         this.downloadPath = downloadPath;
     }
 
-    private final void refreshMasterDownloadURL() {
-        formattedMasterDownloadUrl = String.format(MASTER_DOWNLOAD_URL, updateDetails.getGitUser(), updateDetails.getRepo());
+    private final void refreshMasterDownloadURL() throws MalformedURLException {
+        formattedMasterDownloadUrl = new URL(String.format(MASTER_DOWNLOAD_URL, updateDetails.getGitUser(), updateDetails.getRepo()));
     }
 
     public <T extends IGitParseListener> void setParseListener(T listener){
@@ -95,7 +94,7 @@ public abstract class GitUpdater extends HttpUpdater<HttpDownloader> {
     }
 
     @Override
-    public String getLatestProjectRevision() throws ProjectRevisionException {
+    public String getLatestProjectRevision() {
         try {
             URL downloadURL = new URL(formattedGitApiUrl + updateDetails.createGetQueryString());
             String content = new String(getHttpDownloader().downloadHttpContent(downloadURL));

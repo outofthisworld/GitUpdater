@@ -3,7 +3,6 @@ package git.sync.updaters;
 import git.sync.exception.FileVerificationException;
 import git.sync.exception.ProjectRevisionException;
 
-import javax.xml.ws.http.HTTPException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -53,11 +52,11 @@ public abstract class Updater{
         return currentRevision.equals(latestRevision);
     }
 
-    public abstract String getCurrentProjectRevision() throws ProjectRevisionException;
+    public abstract String getCurrentProjectRevision();
 
-    public abstract String getLatestProjectRevision() throws ProjectRevisionException;
+    public abstract String getLatestProjectRevision();
 
-    public abstract String downloadLatestRevision() throws HTTPException, IOException;
+    public abstract String downloadLatestRevision() throws IOException;
 
     public abstract Path getDownloadPath();
 
@@ -67,7 +66,7 @@ public abstract class Updater{
 
     protected abstract boolean changeProjectRevision(String oldRevision, String newRevision) throws ProjectRevisionException, IOException, URISyntaxException;
 
-    protected abstract boolean verifyDownload(URL sourceDownloadURL, Path downloadedFilePath, String latestProjectRevision) throws ProjectRevisionException, IOException;
+    protected abstract boolean verifyDownload(URL sourceDownloadURL, Path downloadedFilePath, String latestProjectRevision) throws IOException;
 
     protected abstract void handleDownload(Path path);
 }

@@ -1,6 +1,5 @@
 package git.sync.updaters;
 
-import git.sync.exception.ProjectRevisionException;
 import git.sync.git.GitUpdateDetails;
 import git.sync.http.HttpDownloader;
 import git.sync.listener.GitParseListener;
@@ -8,6 +7,7 @@ import git.sync.listener.GitParseListener;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -33,7 +33,7 @@ public abstract class ConfigGitUpdater extends GitUpdater {
         }
     }
 
-    public ConfigGitUpdater() {
+    public ConfigGitUpdater() throws MalformedURLException {
         super(new GitUpdateDetails(GIT_CONFIG.getProperty("Git.Repository"),
                         GIT_CONFIG.getProperty("Git.User")),
                 new GitParseListener(),
@@ -41,7 +41,7 @@ public abstract class ConfigGitUpdater extends GitUpdater {
     }
 
     @Override
-    public String getCurrentProjectRevision() throws ProjectRevisionException {
+    public String getCurrentProjectRevision() {
         return GIT_CONFIG.getProperty("Git.CurrentProjectRevision");
     }
 
@@ -68,7 +68,7 @@ public abstract class ConfigGitUpdater extends GitUpdater {
     }
 
     @Override
-    public boolean verifyDownload(URL sourceDownloadURL, Path downloadedFilePath, String latestProjectRevision) throws ProjectRevisionException, IOException {
+    public boolean verifyDownload(URL sourceDownloadURL, Path downloadedFilePath, String latestProjectRevision) throws IOException {
         ZipFile zipFile = new ZipFile(downloadedFilePath.toFile());
         return getHttpDownloader().getContentLength(sourceDownloadURL) == downloadedFilePath.toFile().length() &&
                 zipFile.getComment().equals(latestProjectRevision);
