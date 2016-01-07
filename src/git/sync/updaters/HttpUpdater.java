@@ -5,14 +5,14 @@ import git.sync.http.IHttpDownloader;
 /**
  * Created by Unknown on 6/01/2016.
  */
-public abstract class HttpUpdater extends Updater {
-    private final IHttpDownloader iHttpDownloader;
+public abstract class HttpUpdater<T extends IHttpDownloader> extends Updater {
+    private final T iHttpDownloader;
 
-    public HttpUpdater(IHttpDownloader httpDownloader){
+    public HttpUpdater(T httpDownloader) {
         this.iHttpDownloader = httpDownloader;
     }
 
-    public IHttpDownloader getHttpDownloader(){
+    public T getHttpDownloader() {
         return iHttpDownloader;
     }
 }

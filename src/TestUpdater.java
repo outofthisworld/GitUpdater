@@ -17,6 +17,10 @@ public class TestUpdater {
                 System.out.println(path.toString());
             }
         };
+        gitUpdater.getHttpDownloader().addDownloadListener((i, v, u) -> {
+            System.out.println("Downloading from url " + i);
+            System.out.println("Percentage = " + (double) v / u);
+        });
         try {
             if (!gitUpdater.isUpToDate()) {
                 gitUpdater.tryUpdate();

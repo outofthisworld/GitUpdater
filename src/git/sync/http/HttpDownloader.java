@@ -1,5 +1,7 @@
 package git.sync.http;
 
+import git.sync.listener.DownloadListener;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -11,11 +13,14 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 
 /**
  * Created by Unknown on 6/01/2016.
  */
 public class HttpDownloader implements IHttpDownloader {
+    private ArrayList<DownloadListener> downloadListeners = new ArrayList<>();
+
     public Charset getHttpContentEncoding(HttpURLConnection con,Charset defaultCharset){
         String encoding;
         if((encoding = con.getContentEncoding()) == null)
@@ -33,26 +38,36 @@ public class HttpDownloader implements IHttpDownloader {
         return Channels.newChannel(in.getInputStream());
     }
 
-    public ByteBuffer readChannel(ReadableByteChannel channel,int size) throws IOException {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(size);
+    public ByteBuffer readContent(URL url) throws IOException {
+        HttpURLConnection downloadConnection = establishHttpUrlConnection(url);
+
+        ReadableByteChannel readableByteChannel = createReadableByteChannel(downloadConnection);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(downloadConnection.getContentLength());
         int bytesRead = 0;
-        while(bytesRead < size){
-            bytesRead += channel.read(byteBuffer);
+        while (bytesRead < byteBuffer.capacity()) {
+            bytesRead += readableByteChannel.read(byteBuffer);
+            notifyListeners(url, bytesRead, byteBuffer.capacity());
         }
-        channel.close();
+        readableByteChannel.close();
         byteBuffer.flip();
         return byteBuffer;
     }
 
-    public void readChannel(ReadableByteChannel readableByteChannel, Path path, long size) throws IOException {
+    public void readContent(URL url, Path path) throws IOException {
         if (Files.exists(path))
             Files.delete(path);
 
+        HttpURLConnection downloadConnection = establishHttpUrlConnection(url);
+
+        System.out.println("path to wirte... " + path);
         FileChannel fileChannel = FileChannel.open(path, StandardOpenOption.CREATE_NEW, StandardOpenOption.READ, StandardOpenOption.WRITE);
-        long bytesTransfered = 0;
+        ReadableByteChannel readableByteChannel = createReadableByteChannel(downloadConnection);
+        int size = downloadConnection.getContentLength();
+        int bytesTransfered = 0;
         while (bytesTransfered < size) {
-            bytesTransfered = fileChannel.transferFrom(readableByteChannel, bytesTransfered, size);
+            bytesTransfered = (int) fileChannel.transferFrom(readableByteChannel, bytesTransfered, size);
             fileChannel.force(false);
+            notifyListeners(url, bytesTransfered, size);
         }
         fileChannel.close();
     }
@@ -61,14 +76,21 @@ public class HttpDownloader implements IHttpDownloader {
     public byte[] downloadHttpContent(URL url) {
         byte[] contentBytes = null;
         try {
-            HttpURLConnection gitConnectURL = establishHttpUrlConnection(url);
-            contentBytes = readChannel(createReadableByteChannel(gitConnectURL), gitConnectURL.getContentLength()).array();
+            contentBytes = readContent(url).array();
         } catch (IOException e) {
             return contentBytes;
         }
         return contentBytes;
     }
 
+    @Override
+    public void downloadHttpContent(URL url, Path path) {
+        try {
+            readContent(url, path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     public long getContentLength(URL url) throws IOException {
         return establishHttpUrlConnection(url).getContentLengthLong();
     }
@@ -78,14 +100,13 @@ public class HttpDownloader implements IHttpDownloader {
         return con.getContentLengthLong();
     }
 
-    @Override
-    public void downloadHttpContent(URL url, Path path) {
-        try {
-            HttpURLConnection con = establishHttpUrlConnection(url);
-            ReadableByteChannel readableByteChannel = createReadableByteChannel(con);
-            readChannel(readableByteChannel, path, con.getContentLengthLong());
-        } catch (IOException e) {
-            e.printStackTrace();
+    public <T extends DownloadListener> void addDownloadListener(T downloadListener) {
+        this.downloadListeners.add(downloadListener);
+    }
+
+    private final void notifyListeners(URL url, int totalBytes, int size) {
+        for (DownloadListener listener : downloadListeners) {
+            listener.contentDownloaded(url, totalBytes, size);
         }
     }
 }

@@ -2,7 +2,7 @@ package git.sync.updaters;
 
 import git.sync.exception.ProjectRevisionException;
 import git.sync.git.GitUpdateDetails;
-import git.sync.http.IHttpDownloader;
+import git.sync.http.HttpDownloader;
 import git.sync.listener.IGitParseListener;
 
 import java.io.IOException;
@@ -14,16 +14,16 @@ import java.util.Map;
 /**
  * Created by Unknown on 5/01/2016.
  */
-public abstract class GitUpdater extends HttpUpdater {
+public abstract class GitUpdater extends HttpUpdater<HttpDownloader> {
     private static final String GIT_API_URL = "https://api.github.com/repos/%s/%s/commits?";
-    private static final String MASTER_DOWNLOAD_URL = "https://github.com/%s/%s/archive/master.zip";
+    private static final String MASTER_DOWNLOAD_URL = "https://github.com/%s/%s/archive/";
     private String formattedGitApiUrl;
     private String formattedMasterDownloadUrl;
     private IGitParseListener parseListener;
     private GitUpdateDetails updateDetails;
     private Path downloadPath;
 
-    public <T extends GitUpdateDetails,U extends IGitParseListener,V extends IHttpDownloader> GitUpdater(T gitUpdateDetails,U parseListener,V httpDownloader){
+    public <T extends GitUpdateDetails, U extends IGitParseListener, V extends HttpDownloader> GitUpdater(T gitUpdateDetails, U parseListener, V httpDownloader) {
         super(httpDownloader);
         this.updateDetails = gitUpdateDetails;
         this.parseListener = parseListener;
@@ -82,6 +82,10 @@ public abstract class GitUpdater extends HttpUpdater {
         formattedGitApiUrl = String.format(GIT_API_URL, updateDetails.getGitUser(), updateDetails.getRepo());
     }
 
+    public void setDownloadPath(Path downloadPath) {
+        this.downloadPath = downloadPath;
+    }
+
     private final void refreshMasterDownloadURL() {
         formattedMasterDownloadUrl = String.format(MASTER_DOWNLOAD_URL, updateDetails.getGitUser(), updateDetails.getRepo());
     }
@@ -103,13 +107,13 @@ public abstract class GitUpdater extends HttpUpdater {
     }
 
     public URL getDownloadURL() throws MalformedURLException {
-        return new URL(formattedMasterDownloadUrl);
+        return new URL(formattedMasterDownloadUrl + getDownloadFileName());
     }
 
     @Override
     public String downloadLatestRevision() throws IOException {
         getHttpDownloader().downloadHttpContent(getDownloadURL(), downloadPath);
-        return getDownloadPath().toAbsolutePath().toString();
+        return downloadPath.toAbsolutePath().toString();
     }
 
 }

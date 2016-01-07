@@ -61,11 +61,13 @@ public abstract class Updater{
 
     public abstract Path getDownloadPath();
 
+    public abstract String getDownloadFileName();
+
     public abstract URL getDownloadURL() throws MalformedURLException;
 
     protected abstract boolean changeProjectRevision(String oldRevision, String newRevision) throws ProjectRevisionException, IOException, URISyntaxException;
 
-    protected abstract boolean verifyDownload(URL sourceDownloadURL, Path downloadedFilePath, String latestProjectRevision) throws ProjectRevisionException;
+    protected abstract boolean verifyDownload(URL sourceDownloadURL, Path downloadedFilePath, String latestProjectRevision) throws ProjectRevisionException, IOException;
 
     protected abstract void handleDownload(Path path);
 }
