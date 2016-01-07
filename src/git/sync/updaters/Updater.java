@@ -2,10 +2,10 @@ package git.sync.updaters;
 
 import git.sync.exception.FileVerificationException;
 import git.sync.exception.ProjectRevisionException;
+import sun.plugin.dom.exception.InvalidStateException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -17,27 +17,34 @@ import java.nio.file.Paths;
  */
 public abstract class Updater{
 
-    public boolean tryUpdate() throws IOException, ProjectRevisionException, FileVerificationException, URISyntaxException {
+    public void tryUpdate() throws IllegalStateException, IOException, ProjectRevisionException, FileVerificationException, URISyntaxException {
         final String currentProjectRevision = getCurrentProjectRevision();
         final String latestProjectRevision = getLatestProjectRevision();
+
+        if (getDownloadFileName() == null)
+            throw new InvalidStateException("getDownloadFileName() in updater is returning null");
 
         if(currentProjectRevision == null || latestProjectRevision == null)
             throw new ProjectRevisionException("Either current project revision or latest project revision return null");
 
         if (isUpToDate(currentProjectRevision, latestProjectRevision))
-            return false;
+            return;
 
         Path filePath = Paths.get(downloadLatestRevision());
 
         if(!pathExists(filePath))
             throw new FileNotFoundException("Could not find the latest download revision file");
 
-        if (!verifyDownload(getDownloadURL(), filePath, latestProjectRevision))
-            throw new FileVerificationException("Could not verify the downloaded file");
-
-        changeProjectRevision(currentProjectRevision,latestProjectRevision);
-        handleDownload(filePath);
-        return true;
+        try {
+            if (verifyDownload(getDownloadURL(), filePath, latestProjectRevision)) {
+                changeProjectRevision(currentProjectRevision, latestProjectRevision);
+                handleDownload(filePath);
+            }
+        } catch (IOException e) {
+            if (pathExists(filePath))
+                Files.delete(filePath);
+            throw new FileVerificationException("Could not verify the downloaded file.. if the file existed it has now been deleted.");
+        }
     }
 
     protected boolean pathExists(Path filePath) {
@@ -62,7 +69,7 @@ public abstract class Updater{
 
     public abstract String getDownloadFileName();
 
-    public abstract URL getDownloadURL() throws MalformedURLException;
+    public abstract URL getDownloadURL();
 
     protected abstract boolean changeProjectRevision(String oldRevision, String newRevision) throws ProjectRevisionException, IOException, URISyntaxException;
 

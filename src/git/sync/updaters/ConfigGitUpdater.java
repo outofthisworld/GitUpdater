@@ -42,26 +42,27 @@ public abstract class ConfigGitUpdater extends GitUpdater {
 
     @Override
     public String getCurrentProjectRevision() {
-        return GIT_CONFIG.getProperty("Git.CurrentProjectRevision");
+        String currentRevision = GIT_CONFIG.getProperty("Git." + getGitUpdateDetails().getGitUser() + "." + getGitUpdateDetails().getRepo() + ".Revision");
+        return currentRevision == null ? "" : currentRevision;
     }
 
     @Override
     public Path getDownloadPath() {
         return Paths.get(System.getProperty("user.home") +
                 File.separator +
-                GIT_CONFIG.getProperty("Git.Download.FileName"));
+                getDownloadFileName());
     }
 
     public String getDownloadFileName() {
-        return GIT_CONFIG.getProperty("Git.Download.FileName");
+        return GIT_CONFIG.getProperty("Git." + getGitUpdateDetails().getGitUser() + "." + getGitUpdateDetails().getRepo() + ".FileName");
     }
 
     @Override
     public boolean changeProjectRevision(String oldRevision, String newRevision) throws IOException, URISyntaxException {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(ISO_8601_DATE_FORMAT);
         String iso_8601_date = simpleDateFormat.format(new Date());
-        GIT_CONFIG.setProperty("Git.CurrentProjectRevision", newRevision);
-        GIT_CONFIG.setProperty("Git.LastRevisionChange", iso_8601_date);
+        GIT_CONFIG.setProperty("Git." + getGitUpdateDetails().getGitUser() + "." + getGitUpdateDetails().getRepo() + ".Revision", newRevision);
+        GIT_CONFIG.setProperty("Git." + getGitUpdateDetails().getGitUser() + "." + getGitUpdateDetails().getRepo() + ".LastRevisionChange", iso_8601_date);
         GIT_CONFIG.store(new FileOutputStream(new File(Thread.currentThread().getContextClassLoader()
                 .getResource(GIT_CONFIG_LOCATION.substring(1, GIT_CONFIG_LOCATION.length())).toURI().getPath())), "Last revision update on: " + iso_8601_date);
         return true;

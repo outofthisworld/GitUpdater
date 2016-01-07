@@ -30,6 +30,8 @@ public class TestUpdater {
                 } else {
                     System.out.println("Project is up to date");
                 }
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (ProjectRevisionException e) {

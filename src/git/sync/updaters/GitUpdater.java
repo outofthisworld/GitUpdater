@@ -27,7 +27,7 @@ public abstract class GitUpdater extends HttpUpdater<HttpDownloader> {
         this.updateDetails = gitUpdateDetails;
         this.parseListener = parseListener;
         formattedGitApiUrl = new URL(String.format(GIT_API_URL, updateDetails.getGitUser(), updateDetails.getRepo()));
-        formattedMasterDownloadUrl = new URL(String.format(MASTER_DOWNLOAD_URL, updateDetails.getGitUser(), updateDetails.getRepo()));
+        formattedMasterDownloadUrl = new URL(String.format(MASTER_DOWNLOAD_URL, updateDetails.getGitUser(), updateDetails.getRepo()) + getDownloadFileName());
         downloadPath = getDownloadPath();
     }
 
@@ -105,13 +105,14 @@ public abstract class GitUpdater extends HttpUpdater<HttpDownloader> {
         return parseListener.getLatestRevision();
     }
 
-    public URL getDownloadURL() throws MalformedURLException {
-        return new URL(formattedMasterDownloadUrl + getDownloadFileName());
+    @Override
+    public URL getDownloadURL() {
+        return formattedMasterDownloadUrl;
     }
 
     @Override
     public String downloadLatestRevision() throws IOException {
-        getHttpDownloader().downloadHttpContent(getDownloadURL(), downloadPath);
+        getHttpDownloader().downloadHttpContent(formattedMasterDownloadUrl, downloadPath);
         return downloadPath.toAbsolutePath().toString();
     }
 
