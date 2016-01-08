@@ -21,9 +21,9 @@ import java.util.ArrayList;
 public class HttpDownloader implements IHttpDownloader {
     private ArrayList<DownloadListener> downloadListeners = new ArrayList<>();
 
-    public Charset getHttpContentEncoding(HttpURLConnection con,Charset defaultCharset){
+    public Charset getHttpContentEncoding(HttpURLConnection con, Charset defaultCharset) {
         String encoding;
-        if((encoding = con.getContentEncoding()) == null)
+        if ((encoding = con.getContentEncoding()) == null)
             return defaultCharset;
 
         return Charset.forName(encoding);
@@ -91,6 +91,7 @@ public class HttpDownloader implements IHttpDownloader {
             e.printStackTrace();
         }
     }
+
     public long getContentLength(URL url) throws IOException {
         return establishHttpUrlConnection(url).getContentLengthLong();
     }

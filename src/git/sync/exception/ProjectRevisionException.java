@@ -5,7 +5,7 @@ package git.sync.exception;
  */
 public class ProjectRevisionException extends Exception {
 
-    public ProjectRevisionException(String reason){
+    public ProjectRevisionException(String reason) {
         super(reason);
     }
 }

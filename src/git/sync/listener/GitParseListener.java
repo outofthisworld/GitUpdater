@@ -12,7 +12,7 @@ public class GitParseListener implements IGitParseListener {
 
     @Override
     public String getLatestRevision() {
-        if(jsonObject == null)
+        if (jsonObject == null)
             return null;
 
         return jsonObject.get("sha").toString().replaceAll("\"", "");

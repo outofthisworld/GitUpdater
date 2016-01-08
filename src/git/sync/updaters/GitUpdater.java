@@ -89,7 +89,7 @@ public abstract class GitUpdater extends HttpUpdater<HttpDownloader> {
         formattedMasterDownloadUrl = new URL(String.format(MASTER_DOWNLOAD_URL, updateDetails.getGitUser(), updateDetails.getRepo()));
     }
 
-    public <T extends IGitParseListener> void setParseListener(T listener){
+    public <T extends IGitParseListener> void setParseListener(T listener) {
         this.parseListener = listener;
     }
 
