@@ -52,11 +52,11 @@ public abstract class Updater{
     }
 
     public boolean isUpToDate() throws ProjectRevisionException {
-        return getCurrentProjectRevision().equals(getLatestProjectRevision());
+        return getCurrentProjectRevision().equals(getLatestProjectRevision()) && pathExists(getDownloadPath());
     }
 
     private boolean isUpToDate(String currentRevision, String latestRevision) {
-        return currentRevision.equals(latestRevision);
+        return currentRevision.equals(latestRevision) && pathExists(getDownloadPath());
     }
 
     public abstract String getCurrentProjectRevision();
