@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/GitUpdater.iml" filepath="$PROJECT_DIR$/GitUpdater.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ATestProject.iml" filepath="$PROJECT_DIR$/ATestProject.iml" />
     </modules>
   </component>
 </project>

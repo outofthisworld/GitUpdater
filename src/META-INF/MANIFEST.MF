@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Main-Class: instrumentation.Test
+Agent-Class: instrumentation.JavaAgent
+Premain-Class: instrumentation.JavaAgent
+

@@ -59,7 +59,6 @@ public class HttpDownloader implements IHttpDownloader {
 
         HttpURLConnection downloadConnection = establishHttpUrlConnection(url);
 
-        System.out.println("path to wirte... " + path);
         FileChannel fileChannel = FileChannel.open(path, StandardOpenOption.CREATE_NEW, StandardOpenOption.READ, StandardOpenOption.WRITE);
         ReadableByteChannel readableByteChannel = createReadableByteChannel(downloadConnection);
         int size = downloadConnection.getContentLength();
