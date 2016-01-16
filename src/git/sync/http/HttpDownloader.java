@@ -62,11 +62,11 @@ public class HttpDownloader implements IHttpDownloader {
         FileChannel fileChannel = FileChannel.open(path, StandardOpenOption.CREATE_NEW, StandardOpenOption.READ, StandardOpenOption.WRITE);
         ReadableByteChannel readableByteChannel = createReadableByteChannel(downloadConnection);
         int size = downloadConnection.getContentLength();
-        int bytesTransfered = 0;
-        while (bytesTransfered < size) {
-            bytesTransfered = (int) fileChannel.transferFrom(readableByteChannel, bytesTransfered, size);
+        int bytesMoved = 0;
+        while (bytesMoved < size) {
+            bytesMoved = (int) fileChannel.transferFrom(readableByteChannel, bytesMoved, size);
+            notifyListeners(url, bytesMoved, size);
             fileChannel.force(false);
-            notifyListeners(url, bytesTransfered, size);
         }
         fileChannel.close();
     }

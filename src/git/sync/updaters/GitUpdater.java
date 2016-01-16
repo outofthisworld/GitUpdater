@@ -105,6 +105,14 @@ public abstract class GitUpdater extends HttpUpdater<HttpDownloader> {
         return parseListener.getLatestRevision();
     }
 
+    public URL getFormattedGitApiUrl() {
+        return formattedGitApiUrl;
+    }
+
+    public URL getFormattedMasterDownloadUrl() {
+        return formattedMasterDownloadUrl;
+    }
+
     @Override
     public URL getDownloadURL() {
         return formattedMasterDownloadUrl;

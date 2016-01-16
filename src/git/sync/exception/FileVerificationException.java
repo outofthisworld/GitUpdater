@@ -8,4 +8,8 @@ public class FileVerificationException extends Exception {
     public FileVerificationException(String message) {
         super(message);
     }
+
+    public FileVerificationException(String message, Throwable ex) {
+        super(message, ex);
+    }
 }
