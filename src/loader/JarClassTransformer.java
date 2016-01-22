@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -17,63 +18,72 @@ import java.util.jar.JarFile;
 /**
  * Created by Unknown on 21/01/2016.
  */
-public class JarClassLoader extends ClassLoader implements IJarClassLoader, ClassTransformer {
-    private final HashMap<String, Class<?>> jarEntries = new HashMap<>();
+public class JarClassTransformer extends ClassLoader implements IJarClassLoader, ClassTransformer {
+    private static final String CLASS_CONS = ".class";
+    private final HashMap<String, byte[]> jarEntries = new HashMap<>();
+    private final HashMap<String, Class<?>> klazzMap = new HashMap<>();
     private final ArrayList<IClassTransformListener> transformers = new ArrayList<>();
     private JarFile jarFile;
 
-    public JarClassLoader() {
-    }
-
-    
-    public JarClassLoader(JarFile jarFile) throws IOException {
-        loadJar(jarFile);
+    public JarClassTransformer() {
     }
 
 
-    public static <T extends JarFile> JarClassLoader loadJarFile(final T jarFile) throws IOException {
-        return new JarClassLoader(jarFile);
+    public JarClassTransformer(JarFile jarFile) throws IOException {
+        Objects.requireNonNull(jarFile);
+        loadAndTransformJar(jarFile);
+    }
+
+    public static <T extends JarFile> JarClassTransformer loadJarFile(final T jarFile) throws IOException {
+        Objects.requireNonNull(jarFile);
+        return new JarClassTransformer(jarFile);
     }
 
     @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException {
-        if (jarEntries.get(name) != null)
-            return jarEntries.get(name);
+        byte[] classBytes = jarEntries.get(name);
+
+        if (classBytes != null) {
+            klazzMap.put(name, defineClass(name, classBytes, 0, classBytes.length));
+            return klazzMap.get(name);
+        }
 
         return super.loadClass(name);
     }
 
     public void forEachClass(Consumer<Class<?>> consumer) {
-        jarEntries.values().stream().forEach(e -> consumer.accept(e));
+        klazzMap.values().stream().forEach(e -> consumer.accept(e));
     }
 
     public boolean containsClassMatching(Predicate<Class<?>> pred) {
-        return jarEntries.values().stream().filter(e -> pred.test(e)).count() > 0;
+        return klazzMap.values().stream().filter(e -> pred.test(e)).count() > 0;
     }
 
     private final void forEachJarEntry(BiConsumer<String, byte[]> consumer) throws IOException {
         for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements(); ) {
             JarEntry en = entries.nextElement();
 
-            if (en.isDirectory() || !en.getName().endsWith(".class"))
+            if (en.isDirectory() || !en.getName().endsWith(CLASS_CONS))
                 continue;
 
-            consumer.accept(en.getName(), readEntry(jarFile.getInputStream(en), (int) en.getSize()));
+            consumer.accept(en.getName().replace(CLASS_CONS, ""), readEntry(jarFile.getInputStream(en), (int) en.getSize()));
         }
     }
 
     @Override
     public <T extends JarFile> void loadJar(T file) throws IOException {
+        Objects.requireNonNull(file);
         this.jarFile = file;
         forEachJarEntry((n, b) -> {
-            jarEntries.put(n, defineClass(n, b, 0, b.length));
+            jarEntries.put(n, b);
         });
     }
 
     public <T extends JarFile> void loadAndTransformJar(T file) throws IOException {
+        Objects.requireNonNull(file);
         this.jarFile = file;
         forEachJarEntry((n, b) -> {
-            jarEntries.put(n, defineClass(n, transform(b), 0, b.length));
+            jarEntries.put(n, transform(b));
         });
     }
 
@@ -82,6 +92,7 @@ public class JarClassLoader extends ClassLoader implements IJarClassLoader, Clas
         try (BufferedInputStream bufferedInputStream = new BufferedInputStream(in)) {
             bufferedInputStream.read(entryBytes, 0, entryBytes.length);
         }
+        in.close();
         return entryBytes;
     }
 
@@ -103,6 +114,6 @@ public class JarClassLoader extends ClassLoader implements IJarClassLoader, Clas
 
     @Override
     public Class<?> getClass(String className) {
-        return jarEntries.get(className);
+        return klazzMap.get(className);
     }
 }

@@ -17,7 +17,9 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import loader.JarClassTransformer;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -27,13 +29,14 @@ import java.text.DecimalFormat;
 import java.util.ResourceBundle;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Created by Unknown on 16/01/2016.
  */
-public class GUI extends Application implements Initializable, Runnable {
+public class GUI extends Application implements Initializable {
     private static final String APP_TITLE = "OSBOT";
     private static final GUI gui = new GUI();
     private static Logger logger;
@@ -117,6 +120,13 @@ public class GUI extends Application implements Initializable, Runnable {
                     logger.log(Level.INFO, "Project is up to date.");
                 }
                 launchButton.setDisable(false);
+                JarClassTransformer jarClassLoader = new JarClassTransformer(new JarFile(new File(getClass().getResource("/gamepack_4127917.jar").getPath())));
+                try {
+                    jarClassLoader.loadClass("client");
+                    jarClassLoader.forEachClass(e -> System.out.println(e.getName()));
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
             } catch (ProjectRevisionException | IOException | FileVerificationException | URISyntaxException e) {
                 logger.log(Level.SEVERE, e.getMessage());
                 retry.setVisible(true);
@@ -139,8 +149,4 @@ public class GUI extends Application implements Initializable, Runnable {
         executor.execute(runnableUpdate);
     }
 
-    @Override
-    public void run() {
-        update();
-    }
 }
