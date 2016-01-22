@@ -37,7 +37,7 @@ public abstract class ConfigGitUpdater extends GitUpdater {
         super(new GitUpdateDetails(GIT_CONFIG.getProperty("Git.Repository"),
                         GIT_CONFIG.getProperty("Git.User")),
                 new GitParseListener(),
-                new HttpDownloader());
+                HttpDownloader.getInstance());
     }
 
     @Override

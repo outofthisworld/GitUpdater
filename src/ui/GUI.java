@@ -7,6 +7,7 @@ import git.sync.logging.TextAreaLoggingHandler;
 import git.sync.updaters.ConfigGitUpdater;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -24,6 +25,8 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.ResourceBundle;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,36 +35,62 @@ import java.util.logging.Logger;
  */
 public class GUI extends Application implements Initializable, Runnable {
     private static final String APP_TITLE = "OSBOT";
+    private static final GUI gui = new GUI();
     private static Logger logger;
     private static Stage primary_stage;
-
+    private final Executor executor = Executors.newFixedThreadPool(1);
     @FXML
     private Button launchButton;
-
+    @FXML
+    private Button retry;
     @FXML
     private TextArea logArea;
-
     @FXML
     private ProgressBar progressBar;
-
     @FXML
     private Text percentage;
+    private final Runnable runnableUpdate = () -> update();
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public static GUI getGuiInstance() {
+        return gui;
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         primary_stage = primaryStage;
         primary_stage.setTitle(APP_TITLE);
-        primaryStage.setResizable(false);
+        primary_stage.setResizable(false);
+        setScene("/Application.fxml");
+        primaryStage.show();
+    }
+
+    public void setScene(URL url) {
+        Platform.runLater(() -> {
         try {
-            primary_stage.setScene(new Scene(FXMLLoader.load(getClass().getResource("/Application.fxml"))));
+            primary_stage.setScene(new Scene(FXMLLoader.load(url)));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        primary_stage.show();
+        });
+    }
+
+
+    public void setScene(URL url, int width, int height) {
+        Platform.runLater(() -> {
+            try {
+                primary_stage.setScene(new Scene(FXMLLoader.load(url), width, height));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public void setScene(String fxmlResource) {
+        setScene(getClass().getResource("/Application.fxml"));
     }
 
     private final void update() {
@@ -90,20 +119,24 @@ public class GUI extends Application implements Initializable, Runnable {
                 launchButton.setDisable(false);
             } catch (ProjectRevisionException | IOException | FileVerificationException | URISyntaxException e) {
                 logger.log(Level.SEVERE, e.getMessage());
+                retry.setVisible(true);
             }
         } catch (MalformedURLException e) {
             logger.log(Level.SEVERE, e.getStackTrace().toString());
         }
     }
 
+    @FXML
+    void retryUpdate(ActionEvent event) {
+        retry.setVisible(false);
+        executor.execute(runnableUpdate);
+    }
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         logger = GitLogger.getGitLogger(this.getClass(), TextAreaLoggingHandler.createTextAreaLoggingHandler(logArea, true));
-        Thread updateThread = new Thread(this);
-        updateThread.setName("Update-thread");
-        updateThread.setPriority(10);
-        updateThread.start();
+        executor.execute(runnableUpdate);
     }
 
     @Override

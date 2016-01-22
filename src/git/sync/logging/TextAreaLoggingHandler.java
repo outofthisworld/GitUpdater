@@ -36,8 +36,8 @@ public class TextAreaLoggingHandler extends Handler {
     public void publish(LogRecord record) {
         final StringBuilder stringBuilder = new StringBuilder().append(textArea.getText()).append(System.getProperty("line.separator"));
 
-        stringBuilder.append("Class: ").append(record.getLoggerName()).append(", Sequence: ").append(record.getSequenceNumber()).append(", Thread: ").append(record.getThreadID())
-                .append(": ").append(record.getMessage()).append(System.getProperty("line.separator"));
+        stringBuilder.append("Dispatcher: ").append(record.getLoggerName())
+                .append(": ").append(record.getMessage());
         Platform.runLater(() -> textArea.setText(stringBuilder.toString()));
 
     }

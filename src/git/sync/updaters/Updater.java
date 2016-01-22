@@ -54,7 +54,7 @@ public abstract class Updater {
             throw new InvalidStateException("getDownloadFileName() in updater is returning null");
         }
 
-        if (currentProjectRevision == null || latestProjectRevision == null)
+        if (currentProjectRevision == null || currentProjectRevision.equals("") || latestProjectRevision == null)
             throw new ProjectRevisionException("Error: either current project revision or latest project revision return null, cannot verify if the project is up to date");
 
         if (isUpToDate(currentProjectRevision, latestProjectRevision)) {

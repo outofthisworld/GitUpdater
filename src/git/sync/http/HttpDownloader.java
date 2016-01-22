@@ -2,6 +2,7 @@ package git.sync.http;
 
 import git.sync.listener.DownloadListener;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -19,7 +20,12 @@ import java.util.ArrayList;
  * Created by Unknown on 6/01/2016.
  */
 public class HttpDownloader implements IHttpDownloader {
+    private static final HttpDownloader httpDownloader = new HttpDownloader();
     private ArrayList<DownloadListener> downloadListeners = new ArrayList<>();
+
+    public static final HttpDownloader getInstance() {
+        return httpDownloader;
+    }
 
     public Charset getHttpContentEncoding(HttpURLConnection con, Charset defaultCharset) {
         String encoding;
@@ -35,7 +41,7 @@ public class HttpDownloader implements IHttpDownloader {
     }
 
     public ReadableByteChannel createReadableByteChannel(HttpURLConnection in) throws IOException {
-        return Channels.newChannel(in.getInputStream());
+        return Channels.newChannel(new BufferedInputStream(in.getInputStream()));
     }
 
     public ByteBuffer readContent(URL url) throws IOException {
